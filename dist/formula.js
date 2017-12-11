@@ -14254,6 +14254,10 @@ exports.INDEX = function(lookupArray, lookupRow, lookupColumn) {
 };
 
 exports.MATCH = function(lookupValue, lookupArray, matchType) {
+  if (matchType === true) {
+    matchType = 1;
+  }
+
   if (!lookupValue && !lookupArray) {
     return error.na;
   }
