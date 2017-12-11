@@ -14275,6 +14275,9 @@ exports.MATCH = function(lookupValue, lookupArray, matchType) {
   if (matchType !== -1 && matchType !== 0 && matchType !== 1) {
     return error.na;
   }
+
+  lookupArray = lookupArray.flatten();
+
   var index;
   var indexValue;
   for (var idx = 0; idx < lookupArray.length; idx++) {
