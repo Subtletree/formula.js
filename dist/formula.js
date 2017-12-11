@@ -7,7 +7,7 @@
 		exports["formulajs"] = factory();
 	else
 		root["formulajs"] = factory();
-})(this, function() {
+})(typeof self !== 'undefined' ? self : this, function() {
 return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
@@ -3894,6 +3894,31 @@ exports.DATE = function(year, month, day) {
   return result;
 };
 
+exports.DATEDIF = function(start_date, end_date, interval) {
+  end_date = utils.parseDate(end_date);
+  start_date = utils.parseDate(start_date);
+
+  if (end_date instanceof Error) {
+    return end_date;
+  }
+  if (start_date instanceof Error) {
+    return start_date;
+  }
+  if (typeof interval !== 'string') {
+    return error.value;
+  }
+
+  var difference = end_date - start_date;
+  switch (interval.toLowerCase()) {
+    case 'y':
+      return Math.floor(difference / 31556952000);
+    case 'm':
+      return Math.floor(difference / 2629746000);
+    case 'd':
+      return Math.floor(difference / 86400000);
+  }
+};
+
 exports.DATEVALUE = function(date_text) {
   if (typeof date_text !== 'string') {
     return error.value;
@@ -4370,7 +4395,7 @@ function serial(date) {
 
 /* WEBPACK VAR INJECTION */(function(process) {var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
  * numbro.js
- * version : 1.11.0
+ * version : 1.11.1
  * author : Företagsplatsen AB
  * license : MIT
  * http://www.foretagsplatsen.se
@@ -4384,7 +4409,7 @@ function serial(date) {
     ************************************/
 
     var numbro,
-        VERSION = '1.11.0',
+        VERSION = '1.11.1',
         binarySuffixes = ['B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'],
         decimalSuffixes = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'],
         bytes = {
@@ -5654,9 +5679,9 @@ function serial(date) {
 
         /*global define:false */
         if (true) {
-            !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_RESULT__ = function() {
+            !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_RESULT__ = (function() {
                 return numbro;
-            }.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
+            }).apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__),
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
         }
     }
@@ -8962,17 +8987,6 @@ jStat.extend({
     return jStat.map(arr, function(value) { return value * arg; });
   },
 
-  outer:function(A,B){
-    /* outer([1,2,3],[4,5,6])
-    ===
-    [[1],[2],[3]] times [[4,5,6]]
-    ->
-    [[4,5,6],[8,10,12],[12,15,18]]
-    */
-    return jStat.multiply(A.map(function(t){return [t]}),[B]);
-  },
-
-
   // outer([1,2,3],[4,5,6])
   // ===
   // [[1],[2],[3]] times [[4,5,6]]
@@ -10360,8 +10374,10 @@ jStat.models = (function(){
     var model = ols(endog,exog);
     var ttest = t_test(model);
     var ftest = F_test(model);
+    // Provide the Wherry / Ezekiel / McNemar / Cohen Adjusted R^2
+    // Which matches the 'adjusted R^2' provided by R's lm package
     var adjust_R2 =
-        1 - (1 - model.rsquared) * ((model.nobs - 1) / (model.df_resid));
+        1 - (1 - model.R2) * ((model.nobs - 1) / (model.df_resid));
     model.t = ttest;
     model.f = ftest;
     model.adjust_R2 = adjust_R2;
@@ -12349,6 +12365,7 @@ exports['es-CL'] = require('./es-CL.js');
 exports['es-CO'] = require('./es-CO.js');
 exports['es-CR'] = require('./es-CR.js');
 exports['es-ES'] = require('./es-ES.js');
+exports['es-MX'] = require('./es-MX.js');
 exports['es-NI'] = require('./es-NI.js');
 exports['es-PE'] = require('./es-PE.js');
 exports['es-PR'] = require('./es-PR.js');
@@ -14220,6 +14237,22 @@ exports.YIELDMAT = function() {
 var error = __webpack_require__(0);
 var utils = __webpack_require__(1);
 
+exports.INDEX = function(lookupArray, lookupRow, lookupColumn) {
+  if (!lookupArray && !lookupRow) {
+    return error.na;
+  }
+
+  if (!(lookupArray instanceof Array)) {
+    return error.na;
+  }
+
+  if (arguments.length === 2) {
+    return lookupArray[lookupRow - 1];
+  } else {
+    return lookupArray[lookupRow - 1][lookupColumn - 1];
+  }
+};
+
 exports.MATCH = function(lookupValue, lookupArray, matchType) {
   if (!lookupValue && !lookupArray) {
     return error.na;
@@ -14295,7 +14328,7 @@ exports.VLOOKUP = function (needle, table, index, rangeLookup) {
   }
 
   return error.na;
-};      
+};
 
 exports.HLOOKUP = function (needle, table, index, rangeLookup) {
   if (!needle || !table || !index) {
@@ -14317,6 +14350,40 @@ exports.HLOOKUP = function (needle, table, index, rangeLookup) {
 
   return error.na;
 };
+
+exports.LOOKUP = function() {
+  var lookupValue, lookupArray, lookupVector, resultsVector;
+  if (arguments.length === 2) { // array form
+
+    lookupValue = arguments[0].valueOf();
+    lookupArray = arguments[1];
+
+    for (var i = 0; i < lookupArray.length; i++) {
+      if (typeof lookupArray[i] !== 'undefined' && lookupValue === lookupArray[i].valueOf()) {
+        return lookupArray[i];
+      }
+    }
+  } else if (arguments.length === 3) { // vector form
+    lookupValue = arguments[0].valueOf();
+    lookupVector = arguments[1];
+    resultsVector = arguments[2];
+
+    for (var i = 0; i < lookupVector.length; i++) {
+      if (typeof lookupVector[i] !== 'undefined' && lookupValue === lookupVector[i].valueOf()) {
+        return resultsVector[i];
+      }
+    }
+    var sortedLookup = lookupVector.concat(lookupValue).sort(function(a,b) {
+      return a - b;
+    });
+    var sortedIndex = sortedLookup.indexOf(lookupValue);
+    if (resultsVector[sortedIndex-1]) {
+      return resultsVector[sortedIndex-1];
+    }
+  }
+
+  return error.na;
+}
 
 
 /***/ })
