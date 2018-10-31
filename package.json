@@ -29,15 +29,15 @@
     "blanket": "^1.1.6",
     "browserify": "^13.0.1",
     "cli-table": "^0.3.0",
-    "generate-release": "^0.10.2",
-    "http-server": "^0.9.0",
+    "generate-release": "^1.1.1",
+    "http-server": "^0.11.1",
     "istanbul": "^0.4.5",
-    "jshint": "^2.5.2",
-    "mocha": "^2.5.0",
+    "jshint": "^2.9.6",
+    "mocha": "^5.2.0",
     "mocha-lcov-reporter": "0.0.1",
-    "mocha-spec-cov": "0.0.3",
     "should": "^11.1.0",
-    "webpack": "^3.5.5"
+    "webpack": "^4.23.1",
+    "webpack-cli": "^3.1.2"
   },
   "config": {
     "blanket": {

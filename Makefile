@@ -10,7 +10,7 @@ build:
 	@$(webpack) --config .config/production.js
 
 test:
-	@$(mocha) -u tdd -R mocha-spec-cov -r blanket
+	@$(mocha) -u tdd -r blanket
 
 test-browser:
 	@mkdir -p tmp

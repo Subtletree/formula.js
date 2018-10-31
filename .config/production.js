@@ -1,8 +1,6 @@
 var webpack = require('webpack');
 const path = require('path');
-var plugins = [
-  new webpack.optimize.UglifyJsPlugin()
-];
+
 var filename = '[name].min.js';
 
 module.exports = {
@@ -20,5 +18,7 @@ module.exports = {
       return /numbro\/languages/.test(content);
     }
   },
-  plugins: plugins
+  optimization: {
+    minimize: true
+  }
 };
